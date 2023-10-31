@@ -1,0 +1,65 @@
+version: '3'
+services:
+  mariadb:
+    image: bitnami/mariadb
+    container_name: mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      - MARIADB_USER=bn_moodle
+      - MARIADB_PASSWORD=foobar1111
+      - MARIADB_ROOT_PASSWORD=foobar1111
+      - MARIADB_DATABASE=bitnami_moodle
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+
+    networks:
+      - mynetwork11
+
+  moodle:
+    image: bitnami/moodle:latest
+    environment:
+      - BITNAMI_DEBUG=true
+      - MOODLE_DATABASE_HOST=mariadb
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_USER=bn_moodle
+      - MOODLE_DATABASE_NAME=bitnami_moodle
+      - MOODLE_DATABASE_PASSWORD=foobar1111
+      - MOODLE_DATABASE_ROOT_PASSWORD=foobar1111
+      - MOODLE_SITE_NAME=Moodle skyvar
+      - MOODLE_USERNAME=foobar_user
+      - MOODLE_PASSWORD=foobar1111
+      - MOODLE_LANG=he
+      - WITH_ALL_LOCALES=yes
+      - PHP_MEMORY_LIMIT=1000M
+      - MOODLE_PHP_MAX_EXECUTION_TIME=300
+    volumes:
+      - 'moodle_data:/bitnami/moodle'
+      - 'moodledata_data:/bitnami/moodledata'
+    ports:
+      - 80:8080
+    depends_on:
+      - mariadb
+    networks:
+      - mynetwork11
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - '8080:80'
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+    depends_on:
+      - mariadb
+    networks:
+      - mynetwork11
+volumes:
+  mariadb_data:
+    driver: local
+  moodle_data:
+    driver: local
+  moodledata_data:
+    driver: local
+networks:
+  mynetwork11:
+    driver: bridge
